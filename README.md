@@ -1,0 +1,47 @@
+# DeadlineGhost
+
+**A ghost that haunts your deadlines.**
+
+ADHD-friendly visual timer with white noise for macOS. A menu bar ghost that follows your cursor and grows more agitated as your deadline approaches.
+
+[![Download on the Mac App Store](https://img.shields.io/badge/Download-Mac%20App%20Store-blue?logo=apple&logoColor=white)](https://apps.apple.com/app/deadlineghost)
+[![Platform](https://img.shields.io/badge/platform-macOS%2026+-333?logo=apple)](https://apps.apple.com/app/deadlineghost)
+[![Website](https://img.shields.io/badge/website-live-green)](https://develku.github.io/deadlineghost-website/)
+
+## How It Works
+
+1. **Add a deadline** — Create a task from the menu bar. Pick a quick time (5m, 15m, 1h) or set any date.
+2. **Watch it approach** — The ghost tracks your cursor. As time runs out, colors shift and animations intensify.
+3. **Feel the pressure** — The ghost turns red, shakes violently, and the bar disappears. You feel the urgency without clock-checking.
+
+## Features
+
+- **Visual urgency system** — Four ghost states (Calm → Approaching → Hovering → Enraged) that you feel, not read
+- **Pomodoro timer** — Configurable focus sessions with break cycles
+- **White noise** — Controls macOS Background Sounds natively (rain, stream, ocean) — auto-plays during focus, stops during breaks
+- **Ghost skins** — Multiple ghost personalities with unique animations and weather effects
+- **Customizable** — 7 accent colors, ghost size, bar opacity, keyboard shortcuts, launch at login
+- **Liquid Glass UI** — Built for macOS 26 with native Liquid Glass design
+- **Privacy-first** — All data stays local on your Mac
+
+## Roadmap
+
+- [x] macOS app (launching soon)
+- [ ] iPhone app with iCloud sync
+- [ ] iPad app with multitasking support
+- [ ] Desktop & Lock Screen widgets
+
+## Tech
+
+Built with Swift, SwiftUI, SpriteKit, SwiftData, and StoreKit 2.
+
+## Links
+
+- [Website](https://develku.github.io/deadlineghost-website/)
+- [Mac App Store](https://apps.apple.com/app/deadlineghost)
+- [X / Twitter](https://x.com/DeadlineGhost)
+- [Contact](mailto:officialkud@gmail.com)
+
+## License
+
+Copyright 2026 kud lee. All rights reserved.
