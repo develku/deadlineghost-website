@@ -31,10 +31,6 @@ ADHD-friendly visual timer with white noise for macOS. A menu bar ghost that fol
 - [ ] iPad app with multitasking support
 - [ ] Desktop & Lock Screen widgets
 
-## Tech
-
-Built with Swift, SwiftUI, SpriteKit, SwiftData, and StoreKit 2.
-
 ## Links
 
 - [Website](https://develku.github.io/deadlineghost-website/)
