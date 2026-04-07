@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DeadlineGhost — A ghost that haunts your deadlines</title>
+  <meta name="description" content="ADHD-friendly visual timer with white noise. A macOS menu bar ghost that follows your cursor and grows more agitated as deadlines approach.">
+  <meta property="og:title" content="DeadlineGhost — A ghost that haunts your deadlines">
+  <meta property="og:description" content="ADHD-friendly visual timer with white noise. A macOS menu bar ghost that follows your cursor and grows more agitated as deadlines approach.">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="DeadlineGhost">
+  <meta name="twitter:description" content="ADHD-friendly visual timer with white noise.">
+  <meta name="color-scheme" content="light dark">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue: #3b82f6;
+      --blue-light: #60a5fa;
+      --blue-lighter: #93bbfd;
+      --blue-dark: #2563eb;
+      --blue-bg: #eff6ff;
+      --blue-bg-deep: #dbeafe;
+
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-tertiary: #94a3b8;
+      --bg-primary: #ffffff;
+      --bg-secondary: #f8fafc;
+      --bg-tertiary: #f1f5f9;
+      --border: #e2e8f0;
+
+      --card-bg: #ffffff;
+      --nav-bg: rgba(255, 255, 255, 0.82);
+      --shadow-color: rgba(0, 0, 0, 0.1);
+      --shadow-color-light: rgba(0, 0, 0, 0.05);
+      --hero-gradient-start: #f0f7ff;
+      --hero-gradient-end: #ffffff;
+      --cta-gradient-end: #f0f7ff;
+
+      --radius: 16px;
+      --radius-sm: 10px;
+      --radius-lg: 24px;
+      --max-width: 1080px;
+    }
+
+    /* Dark mode: keep in sync with hiw-layouts.html and video-layouts.html */
+    [data-theme="dark"] {
+      --blue-bg: #1e3a5f;
+      --blue-bg-deep: #1e3a5f;
+
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-tertiary: #64748b;
+      --bg-primary: #0f172a;
+      --bg-secondary: #1e293b;
+      --bg-tertiary: #334155;
+      --border: #334155;
+
+      --card-bg: #1e293b;
+      --nav-bg: rgba(15, 23, 42, 0.85);
+      --shadow-color: rgba(0, 0, 0, 0.3);
+      --shadow-color-light: rgba(0, 0, 0, 0.2);
+      --hero-gradient-start: #0f172a;
+      --hero-gradient-end: #1e293b;
+      --cta-gradient-end: #1e293b;
+    }
+
+    /* Theme transition — applied only on toggle click, not on page load */
+    .theme-transitioning body,
+    .theme-transitioning nav,
+    .theme-transitioning .feature-card,
+    .theme-transitioning .state-card,
+    .theme-transitioning .roadmap-card,
+    .theme-transitioning .hero,
+    .theme-transitioning .final-cta,
+    .theme-transitioning .btn-secondary,
+    .theme-transitioning footer {
+      transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease !important;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+      color: var(--text-primary);
+      background: var(--bg-primary);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* ══════ NAV ══════ */
+    nav {
+      position: fixed; top: 0; width: 100%; z-index: 1000;
+      padding: 0 24px;
+      transition: background 0.3s, box-shadow 0.3s;
+    }
+    nav.scrolled {
+      background: var(--nav-bg);
+      backdrop-filter: saturate(180%) blur(20px);
+      -webkit-backdrop-filter: saturate(180%) blur(20px);
+      box-shadow: 0 1px 0 var(--border);
+    }
+    .nav-inner {
+      max-width: var(--max-width); margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between; height: 60px;
+    }
+    .nav-brand {
+      display: flex; align-items: center; gap: 10px;
+      font-weight: 700; font-size: 17px; color: var(--text-primary); text-decoration: none;
+    }
+    .nav-brand img { width: 32px; height: 32px; border-radius: 8px; }
+    .nav-links { display: flex; gap: 28px; align-items: center; }
+    .nav-links a {
+      color: var(--text-secondary); text-decoration: none; font-size: 14px; font-weight: 500;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text-primary); }
+    .nav-cta {
+      padding: 8px 20px; background: var(--blue); color: white !important;
+      border-radius: 8px; font-weight: 600 !important; font-size: 14px;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .nav-cta:hover { background: var(--blue-dark); transform: translateY(-1px); }
+
+    /* ══════ HERO ══════ */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      padding: 140px 24px 80px;
+      overflow: hidden;
+      background: linear-gradient(180deg, var(--hero-gradient-start) 0%, var(--hero-gradient-end) 70%);
+    }
+    .hero::before {
+      content: ''; position: absolute; top: -300px; left: 50%; transform: translateX(-50%);
+      width: 900px; height: 900px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(59,130,246,0.1) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-content {
+      position: relative; z-index: 2; text-align: center; max-width: 680px;
+      margin: 0 auto; width: 100%;
+      display: flex; flex-direction: column; align-items: center;
+    }
+    .hero-app-icon {
+      width: 80px; height: 80px; border-radius: 20px;
+      box-shadow: 0 8px 24px var(--shadow-color);
+      margin: 0 auto 28px;
+      animation: float 4s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 5px 14px; background: var(--blue-bg); border: 1px solid var(--blue-bg-deep);
+      border-radius: 100px; font-size: 12px; font-weight: 600; color: var(--blue);
+      margin-bottom: 20px; letter-spacing: 0.3px;
+    }
+    .hero-badge::before {
+      content: ''; width: 6px; height: 6px; background: var(--blue); border-radius: 50%;
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(1.6); }
+    }
+    .hero h1 {
+      font-size: clamp(36px, 5.5vw, 56px); font-weight: 800;
+      line-height: 1.1; margin-bottom: 18px; letter-spacing: -0.03em;
+    }
+    .hero h1 .highlight {
+      background: linear-gradient(135deg, var(--blue) 0%, #818cf8 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .hero .subtitle {
+      font-size: clamp(15px, 2vw, 17px); color: var(--text-secondary);
+      max-width: 540px; margin: 0 auto 32px; line-height: 1.7;
+    }
+    .hero-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 13px 26px; border-radius: 12px; font-size: 15px; font-weight: 600;
+      font-family: inherit; cursor: pointer; text-decoration: none;
+      transition: all 0.2s ease; border: none;
+    }
+    .btn-primary {
+      background: var(--blue); color: white;
+      box-shadow: 0 4px 14px rgba(59, 130, 246, 0.3);
+    }
+    .btn-primary:hover {
+      background: var(--blue-dark);
+      box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+      transform: translateY(-2px);
+    }
+    .btn-secondary {
+      background: var(--card-bg); color: var(--text-primary);
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover { background: var(--bg-tertiary); transform: translateY(-2px); }
+    .btn svg { width: 17px; height: 17px; }
+    .hero-hint {
+      margin-top: 16px; font-size: 13px; color: var(--text-tertiary);
+    }
+
+    /* ══════ SECTIONS ══════ */
+    section { padding: 100px 24px; }
+    .container { max-width: var(--max-width); margin: 0 auto; }
+    .section-label {
+      text-align: center; font-size: 12px; font-weight: 700;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--blue); margin-bottom: 10px;
+    }
+    .section-title {
+      text-align: center;
+      font-size: clamp(26px, 3.5vw, 38px); font-weight: 800;
+      margin-bottom: 14px; letter-spacing: -0.02em; line-height: 1.2;
+    }
+    .section-desc {
+      text-align: center; color: var(--text-secondary); font-size: 16px;
+      max-width: 520px; margin: 0 auto 48px; line-height: 1.65;
+    }
+
+    /* ══════ HOW IT WORKS ══════ */
+    .how-it-works { background: var(--bg-secondary); }
+    .hiw-layout {
+      display: grid; grid-template-columns: 280px 1fr;
+      gap: 48px; align-items: center;
+    }
+    .hiw-video video {
+      width: 100%; border-radius: var(--radius);
+      box-shadow: 0 8px 32px var(--shadow-color);
+    }
+    .steps { display: flex; flex-direction: column; gap: 28px; }
+    .step { display: flex; gap: 16px; align-items: flex-start; }
+    .step-num {
+      flex-shrink: 0; width: 38px; height: 38px;
+      background: linear-gradient(135deg, var(--blue), var(--blue-light));
+      color: white; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 15px;
+    }
+    .step-text h3 { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+    .step-text p { color: var(--text-secondary); font-size: 14px; line-height: 1.6; }
+
+    /* ══════ WHITE NOISE ══════ */
+    .whitenoise { padding: 100px 24px; background: var(--bg-secondary); }
+    .whitenoise-layout {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 56px; align-items: center;
+    }
+    .whitenoise-video video {
+      width: 100%; border-radius: var(--radius);
+      box-shadow: 0 8px 32px var(--shadow-color);
+    }
+    .whitenoise-content h3 {
+      font-size: clamp(24px, 3vw, 32px); font-weight: 700; margin-bottom: 16px;
+      line-height: 1.25;
+    }
+    .whitenoise-content h3 span {
+      background: linear-gradient(135deg, var(--blue) 0%, #818cf8 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .whitenoise-content > p {
+      color: var(--text-secondary); font-size: 16px; line-height: 1.65; margin-bottom: 28px;
+    }
+    .wn-features {
+      list-style: none; display: flex; flex-direction: column; gap: 14px;
+    }
+    .wn-features li {
+      display: flex; align-items: flex-start; gap: 10px;
+      font-size: 14px; color: var(--text-secondary); line-height: 1.5;
+    }
+    .wn-features li::before {
+      content: ''; flex-shrink: 0; width: 20px; height: 20px; margin-top: 1px;
+      border-radius: 50%; background: var(--blue-bg);
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%233b82f6' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6L9 17l-5-5'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: center;
+    }
+    .wn-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 12px; background: var(--blue-bg); border: 1px solid var(--blue-bg-deep);
+      border-radius: 20px; font-size: 12px; font-weight: 600; color: var(--blue);
+      margin-bottom: 16px;
+    }
+
+    /* ══════ FEATURES ══════ */
+    .features-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; max-width: 720px; margin: 0 auto; }
+    .feature-card {
+      padding: 28px; background: var(--card-bg); border-radius: var(--radius);
+      border: 1px solid var(--border);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .feature-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px var(--shadow-color-light); }
+    .feature-icon {
+      width: 42px; height: 42px; border-radius: 11px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; margin-bottom: 14px;
+    }
+    .fi-ghost { background: var(--blue-bg); }
+    .fi-timer { background: #fef3c7; }
+    .fi-enforce { background: #fee2e2; }
+    .feature-card h3 { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+    .feature-card p { color: var(--text-secondary); font-size: 14px; line-height: 1.6; }
+
+    /* ══════ GHOST STATES ══════ */
+    .ghost-states { background: var(--bg-secondary); }
+    .states-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+    .state-card {
+      text-align: center; padding: 24px 14px;
+      border-radius: var(--radius); background: var(--card-bg); border: 1px solid var(--border);
+      position: relative; overflow: hidden;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .state-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px var(--shadow-color-light); }
+    .state-card::after {
+      content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px;
+    }
+    .state-card.calm::after { background: #22c55e; }
+    .state-card.warning::after { background: #eab308; }
+    .state-card.critical::after { background: #f97316; }
+    .state-card.enraged::after { background: #ef4444; }
+    .state-ghost-img {
+      width: 52px; height: 52px; object-fit: contain;
+      margin: 0 auto 10px; display: block;
+      transition: transform 0.3s;
+    }
+    .state-card.calm .state-ghost-img { filter: hue-rotate(0deg) brightness(1); }
+    .state-card.warning .state-ghost-img { filter: hue-rotate(-20deg) saturate(1.3) brightness(0.95); }
+    .state-card.critical .state-ghost-img { filter: hue-rotate(-40deg) saturate(1.6) brightness(0.9); }
+    .state-card.enraged .state-ghost-img {
+      filter: hue-rotate(-60deg) saturate(2) brightness(0.85);
+      animation: shake 0.4s ease-in-out infinite;
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-2px) rotate(-1deg); }
+      75% { transform: translateX(2px) rotate(1deg); }
+    }
+    .state-label { font-weight: 700; font-size: 13px; margin-bottom: 4px; }
+    .state-desc { font-size: 12px; color: var(--text-secondary); line-height: 1.45; }
+    .state-bar { height: 3px; border-radius: 2px; margin: 10px auto 0; }
+
+    /* ══════ SKINS ══════ */
+    .skins { text-align: center; }
+    .skins-showcase {
+      border-radius: var(--radius-lg); overflow: hidden;
+      box-shadow: 0 16px 48px var(--shadow-color);
+      border: 1px solid var(--border); max-width: 780px; margin: 0 auto;
+    }
+    .skins-showcase img { width: 100%; display: block; }
+
+    /* ══════ POMODORO ══════ */
+    .pomodoro { background: var(--bg-secondary); }
+    .pomo-layout {
+      display: grid; grid-template-columns: auto 1fr;
+      gap: 48px; align-items: center; max-width: 780px; margin: 0 auto;
+    }
+    .pomo-screenshot {
+      border-radius: var(--radius);
+      box-shadow: 0 12px 36px var(--shadow-color);
+      max-height: 360px; width: auto;
+    }
+    .pomo-content h3 {
+      font-size: 26px; font-weight: 800; margin-bottom: 10px; letter-spacing: -0.02em;
+    }
+    .pomo-content p {
+      color: var(--text-secondary); font-size: 15px; line-height: 1.7; margin-bottom: 18px;
+    }
+    .pomo-features { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+    .pomo-features li {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 14px; color: var(--text-secondary);
+    }
+    .pomo-features li::before {
+      content: ''; width: 18px; height: 18px; min-width: 18px; border-radius: 50%;
+      background: var(--blue-bg);
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%233b82f6' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: center;
+    }
+
+    /* ══════ SETTINGS ══════ */
+    .settings-section { text-align: center; }
+    .settings-layout {
+      display: flex; gap: 24px; justify-content: center;
+      align-items: flex-start; flex-wrap: wrap; max-width: 700px; margin: 0 auto;
+    }
+    .settings-img {
+      border-radius: var(--radius); box-shadow: 0 8px 28px var(--shadow-color);
+      border: 1px solid var(--border); max-height: 320px; width: auto;
+    }
+
+    /* ══════ ROADMAP ══════ */
+    .roadmap { background: var(--bg-secondary); }
+    .roadmap-timeline {
+      max-width: 560px; margin: 0 auto; position: relative; padding-left: 32px;
+    }
+    .roadmap-timeline::before {
+      content: ''; position: absolute; left: 7px; top: 8px; bottom: 8px;
+      width: 2px; background: var(--border);
+    }
+    .roadmap-item { position: relative; margin-bottom: 20px; }
+    .roadmap-item:last-child { margin-bottom: 0; }
+    .roadmap-marker {
+      position: absolute; left: -32px; top: 18px;
+      width: 16px; height: 16px; border-radius: 50%;
+      border: 3px solid var(--border); background: var(--card-bg); z-index: 1;
+    }
+    .roadmap-item.done .roadmap-marker { background: var(--blue); border-color: var(--blue); }
+    .roadmap-item.current .roadmap-marker {
+      background: var(--card-bg); border-color: var(--blue);
+      box-shadow: 0 0 0 4px rgba(59,130,246,0.12);
+    }
+    .roadmap-card {
+      background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 18px 22px; transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .roadmap-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px var(--shadow-color-light); }
+    .roadmap-card h3 { font-size: 15px; font-weight: 700; margin-bottom: 3px; }
+    .roadmap-card p { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
+    .roadmap-tag {
+      display: inline-block; font-size: 10px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.5px;
+      padding: 2px 8px; border-radius: 4px; margin-bottom: 6px;
+    }
+    .tag-done { background: #dcfce7; color: #16a34a; }
+    .tag-current { background: var(--blue-bg); color: var(--blue); }
+    .tag-upcoming { background: var(--bg-tertiary); color: var(--text-tertiary); }
+
+    /* ══════ TRUST ══════ */
+    .trust { padding: 56px 24px; }
+    .trust-grid { display: flex; justify-content: center; gap: 40px; flex-wrap: wrap; }
+    .trust-item {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 14px; color: var(--text-secondary); font-weight: 500;
+    }
+    .trust-icon {
+      width: 34px; height: 34px; border-radius: 9px;
+      background: var(--blue-bg);
+      display: flex; align-items: center; justify-content: center; font-size: 16px;
+    }
+
+    /* ══════ FINAL CTA ══════ */
+    .final-cta {
+      text-align: center;
+      background: linear-gradient(180deg, var(--bg-primary) 0%, var(--cta-gradient-end) 100%);
+      padding: 100px 24px 120px;
+    }
+    .final-cta h2 {
+      font-size: clamp(26px, 4vw, 42px); font-weight: 800;
+      margin-bottom: 10px; letter-spacing: -0.02em;
+    }
+    .final-cta p {
+      color: var(--text-secondary); font-size: 17px; margin-bottom: 32px;
+      max-width: 460px; margin-left: auto; margin-right: auto;
+    }
+    .final-cta .hero-hint { margin-top: 14px; }
+
+    /* ══════ FOOTER ══════ */
+    footer { padding: 36px 24px; border-top: 1px solid var(--border); }
+    .footer-inner {
+      max-width: var(--max-width); margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .footer-copy { font-size: 13px; color: var(--text-tertiary); }
+    .footer-links { display: flex; gap: 20px; }
+    .footer-links a {
+      color: var(--text-tertiary); text-decoration: none; font-size: 13px;
+      transition: color 0.2s;
+    }
+    .footer-links a:hover { color: var(--text-primary); }
+
+    /* ══════ THEME TOGGLE ══════ */
+    .theme-toggle {
+      display: flex; align-items: center; justify-content: center;
+      width: 36px; height: 36px; border-radius: 10px;
+      background: var(--bg-tertiary); border: 1px solid var(--border);
+      cursor: pointer; color: var(--text-secondary);
+      transition: background 0.2s, color 0.2s, border-color 0.2s;
+      margin-left: 8px; flex-shrink: 0;
+    }
+    .theme-toggle:hover { color: var(--blue); border-color: var(--blue); }
+    .theme-toggle .icon-moon { display: none; }
+    [data-theme="dark"] .theme-toggle .icon-sun { display: none; }
+    [data-theme="dark"] .theme-toggle .icon-moon { display: block; }
+
+    /* ══════ RESPONSIVE ══════ */
+    @media (max-width: 900px) {
+      .features-grid { grid-template-columns: repeat(2, 1fr); }
+      .states-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 768px) {
+      .hiw-layout { grid-template-columns: 1fr; gap: 32px; }
+      .hiw-video { max-width: 260px; margin: 0 auto; }
+      .features-grid { grid-template-columns: 1fr; }
+      .states-grid { grid-template-columns: repeat(2, 1fr); }
+      .hero-actions { flex-direction: column; align-items: center; }
+      .btn { width: 100%; max-width: 300px; justify-content: center; }
+      .nav-links a:not(.nav-cta) { display: none; }
+      .footer-inner { flex-direction: column; gap: 12px; }
+      .pomo-layout { grid-template-columns: 1fr; text-align: center; }
+      .pomo-screenshot { max-height: 280px; margin: 0 auto; }
+      .whitenoise-layout { grid-template-columns: 1fr; text-align: center; }
+      .whitenoise-content > p { text-align: left; }
+      .wn-badge { margin: 0 auto 16px; }
+      .trust-grid { gap: 20px; }
+      .settings-layout { flex-direction: column; align-items: center; }
+    }
+    @media (max-width: 480px) {
+      .states-grid { grid-template-columns: 1fr; }
+      section { padding: 72px 20px; }
+    }
+  </style>
+  <script>(function(){try{var t=localStorage.getItem('theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');else if(!t&&window.matchMedia('(prefers-color-scheme:dark)').matches)document.documentElement.setAttribute('data-theme','dark')}catch(e){}})()</script>
+</head>
+<body>
+
+<!-- ══════ NAV ══════ -->
+<nav id="main-nav">
+  <div class="nav-inner">
+    <a href="#" class="nav-brand">
+      <img src="img/app-icon.png" alt="DeadlineGhost">
+      DeadlineGhost
+    </a>
+    <div class="nav-links">
+      <a href="#how-it-works">How It Works</a>
+      <a href="#features">Features</a>
+      <a href="#whitenoise">White Noise</a>
+      <a href="#skins">Skins</a>
+      <a href="#roadmap">Roadmap</a>
+      <a href="#download" class="nav-cta">Download</a>
+    </div>
+    <button class="theme-toggle" onclick="toggleTheme()" role="button" tabindex="0" aria-label="Toggle dark mode">
+      <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+      <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- ══════ HERO ══════ -->
+<section class="hero" id="hero">
+  <div class="hero-content">
+    <img src="img/app-icon.png" alt="DeadlineGhost" class="hero-app-icon">
+    <div class="hero-badge">ADHD-friendly productivity</div>
+    <h1>A ghost that <span class="highlight">haunts your deadlines</span></h1>
+    <p class="subtitle">ADHD-friendly visual timer with white noise. A menu bar ghost that grows agitated as your deadline approaches.</p>
+    <div class="hero-actions">
+      <a href="https://apps.apple.com/app/deadlineghost" class="btn btn-primary" target="_blank">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+        Download on the Mac App Store
+      </a>
+      <a href="#how-it-works" class="btn btn-secondary">See how it works</a>
+    </div>
+    <p class="hero-hint">Requires macOS 26+</p>
+  </div>
+</section>
+
+<!-- ══════ HOW IT WORKS ══════ -->
+<section class="how-it-works" id="how-it-works">
+  <div class="container">
+    <p class="section-label">How It Works</p>
+    <h2 class="section-title">Three steps. Then the ghost takes over.</h2>
+    <p class="section-desc">No setup, no configuration. Add a deadline and the ghost appears instantly.</p>
+    <div class="hiw-layout">
+      <div class="hiw-video">
+        <video autoplay muted loop playsinline>
+          <source src="img/deadline-task.mp4" type="video/mp4">
+        </video>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-text">
+            <h3>Add a deadline</h3>
+            <p>Create a task from the menu bar. Pick a quick time (5m, 15m, 1h) or set any date. A ghost spawns and starts following your cursor.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-text">
+            <h3>Watch it approach</h3>
+            <p>The ghost tracks your cursor everywhere. As time runs out, the bar shrinks, colors shift, and animations intensify.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-text">
+            <h3>Feel the pressure</h3>
+            <p>As the deadline closes in, the ghost turns red, shakes violently, and the bar disappears. Combined with white noise, you feel the urgency — no clock-checking needed.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════ WHITE NOISE ══════ -->
+<section class="whitenoise" id="whitenoise">
+  <div class="container">
+    <div class="whitenoise-layout">
+      <div class="whitenoise-video">
+        <video autoplay muted loop playsinline>
+          <source src="img/deadline-sound.mp4" type="video/mp4">
+        </video>
+      </div>
+      <div class="whitenoise-content">
+        <div class="wn-badge">macOS Native</div>
+        <h3>White noise that <span>starts when you focus</span></h3>
+        <p>DeadlineGhost controls macOS Background Sounds directly — no extra apps, no browser tabs playing rain loops. Real system-level white noise that activates automatically when you start a focus session.</p>
+        <ul class="wn-features">
+          <li>Auto mode: sounds ON during focus, OFF during breaks</li>
+          <li>Works with all macOS Background Sounds (rain, stream, ocean, and more)</li>
+          <li>Three modes: Auto, Always On, Always Off</li>
+          <li>Native system integration — not a workaround</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════ FEATURES ══════ -->
+<section id="features">
+  <div class="container">
+    <p class="section-label">Features</p>
+    <h2 class="section-title">ADHD-friendly with visual timer and white noise</h2>
+    <p class="section-desc">Everything you need to stay accountable, nothing you don't.</p>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon fi-ghost">&#128123;</div>
+        <h3>Visual urgency you can feel</h3>
+        <p>The ghost changes from calm to enraged as your deadline approaches. Urgency you can't ignore, without checking a clock.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon fi-timer">&#9201;&#65039;</div>
+        <h3>Pomodoro timer built in</h3>
+        <p>Focus sessions with configurable breaks. Background Sounds integration plays focus music automatically during work.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════ GHOST STATES ══════ -->
+<section class="ghost-states">
+  <div class="container">
+    <p class="section-label">Urgency System</p>
+    <h2 class="section-title">Four states of haunting</h2>
+    <p class="section-desc">The ghost is a visual proxy for time pressure. You don't read a number &mdash; you feel the urgency.</p>
+    <div class="states-grid">
+      <div class="state-card calm">
+        <img src="img/classic-ghost.png" alt="Calm ghost" class="state-ghost-img">
+        <div class="state-label" style="color:#22c55e;">Calm</div>
+        <div class="state-desc">0&ndash;25% elapsed. Gentle floating, long bar, soothing colors.</div>
+        <div class="state-bar" style="background:#22c55e; width:90px;"></div>
+      </div>
+      <div class="state-card warning">
+        <img src="img/classic-ghost.png" alt="Approaching ghost" class="state-ghost-img">
+        <div class="state-label" style="color:#eab308;">Approaching</div>
+        <div class="state-desc">25&ndash;50% elapsed. Moves closer, bar shrinks, slight agitation.</div>
+        <div class="state-bar" style="background:#eab308; width:64px;"></div>
+      </div>
+      <div class="state-card critical">
+        <img src="img/classic-ghost.png" alt="Hovering ghost" class="state-ghost-img">
+        <div class="state-label" style="color:#f97316;">Hovering</div>
+        <div class="state-desc">50&ndash;75% elapsed. Breathing down your neck, rapid motion.</div>
+        <div class="state-bar" style="background:#f97316; width:36px;"></div>
+      </div>
+      <div class="state-card enraged">
+        <img src="img/classic-ghost.png" alt="Enraged ghost" class="state-ghost-img">
+        <div class="state-label" style="color:#ef4444;">Enraged</div>
+        <div class="state-desc">75&ndash;100% elapsed. Shaking, red tint, bar nearly gone.</div>
+        <div class="state-bar" style="background:#ef4444; width:10px;"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════ SKINS ══════ -->
+<section class="skins" id="skins">
+  <div class="container">
+    <p class="section-label">Ghost Gallery</p>
+    <h2 class="section-title">Pick your haunter.</h2>
+    <p class="section-desc">Each ghost has unique animations, colors, weather effects, and personality. Classic is free &mdash; unlock them all with Pro.</p>
+    <div class="skins-showcase">
+      <img src="img/skin-gallery.png" alt="DeadlineGhost skin gallery showing all ghost personalities">
+    </div>
+  </div>
+</section>
+
+<!-- ══════ POMODORO ══════ -->
+<section class="pomodoro">
+  <div class="container">
+    <div class="pomo-layout">
+      <img src="img/Pomodoro-timer.png" alt="Pomodoro timer" class="pomo-screenshot">
+      <div class="pomo-content">
+        <p class="section-label" style="text-align:left;">Focus Timer</p>
+        <h3>Pomodoro, with a ghost watching</h3>
+        <p>Configurable focus sessions, short and long breaks, session cycle tracking. The ghost keeps you honest during focus time.</p>
+        <ul class="pomo-features">
+          <li>Focus: 5&ndash;120 min, breaks: 1&ndash;60 min</li>
+          <li>Session progress ring with cycle counter</li>
+          <li>Background Sounds: auto-plays during focus</li>
+          <li>Sound modes: Auto / Always On / Always Off</li>
+          <li>Ghost skin captured at session start</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════ SETTINGS ══════ -->
+<section class="settings-section">
+  <div class="container">
+    <p class="section-label">Customization</p>
+    <h2 class="section-title">Make it yours</h2>
+    <p class="section-desc">7 accent colors, ghost size, bar opacity, keyboard shortcuts, and launch at login. Liquid Glass UI throughout.</p>
+    <div class="settings-layout">
+      <img src="img/setting-general.png" alt="Settings with Liquid Glass UI" class="settings-img">
+    </div>
+  </div>
+</section>
+
+<!-- ══════ ROADMAP ══════ -->
+<section class="roadmap" id="roadmap">
+  <div class="container">
+    <p class="section-label">Roadmap</p>
+    <h2 class="section-title">Where we're headed</h2>
+    <p class="section-desc">DeadlineGhost is just getting started. Here's what's coming next.</p>
+    <div class="roadmap-timeline">
+      <div class="roadmap-item current">
+        <div class="roadmap-marker"></div>
+        <div class="roadmap-card">
+          <span class="roadmap-tag tag-current">Launching soon</span>
+          <h3>macOS app</h3>
+          <p>Menu bar ghost, visual deadline tracking, Pomodoro timer, ghost skins, Background Sounds integration.</p>
+        </div>
+      </div>
+      <div class="roadmap-item upcoming">
+        <div class="roadmap-marker"></div>
+        <div class="roadmap-card">
+          <span class="roadmap-tag tag-upcoming">Planned</span>
+          <h3>iPhone app</h3>
+          <p>Deadline ghost on your phone. Visual timer, push notifications, and ghost skins &mdash; synced with your Mac via iCloud.</p>
+        </div>
+      </div>
+      <div class="roadmap-item upcoming">
+        <div class="roadmap-marker"></div>
+        <div class="roadmap-card">
+          <span class="roadmap-tag tag-upcoming">Planned</span>
+          <h3>iPad app</h3>
+          <p>Full ghost overlay experience on iPad with multitasking support and Apple Pencil interactions.</p>
+        </div>
+      </div>
+      <div class="roadmap-item upcoming">
+        <div class="roadmap-marker"></div>
+        <div class="roadmap-card">
+          <span class="roadmap-tag tag-upcoming">Planned</span>
+          <h3>Desktop &amp; Lock Screen widgets</h3>
+          <p>Glanceable deadline countdowns and ghost status on your Home Screen, Lock Screen, and macOS desktop.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════ TRUST ══════ -->
+<div class="trust">
+  <div class="container">
+    <div class="trust-grid">
+      <div class="trust-item">
+        <div class="trust-icon">&#63743;</div>
+        Built for macOS
+      </div>
+      <div class="trust-item">
+        <div class="trust-icon">&#128241;</div>
+        iPhone &amp; iPad coming soon
+      </div>
+      <div class="trust-item">
+        <div class="trust-icon">&#129489;&#8205;&#128187;</div>
+        Indie made
+      </div>
+      <div class="trust-item">
+        <div class="trust-icon">&#128274;</div>
+        Privacy-first, local data
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ FINAL CTA ══════ -->
+<section class="final-cta" id="download">
+  <div class="container">
+    <h2>Ready to be haunted?</h2>
+    <p>Download DeadlineGhost and give your deadlines consequences.</p>
+    <div class="hero-actions">
+      <a href="https://apps.apple.com/app/deadlineghost" class="btn btn-primary" style="font-size:17px; padding: 15px 32px;" target="_blank">
+        <svg viewBox="0 0 24 24" fill="currentColor" style="width:19px;height:19px;"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+        Download on the Mac App Store
+      </a>
+    </div>
+    <p class="hero-hint">Requires macOS 26 or later&nbsp;&nbsp;&middot;&nbsp;&nbsp;Free to download</p>
+  </div>
+</section>
+
+<!-- ══════ FOOTER ══════ -->
+<footer>
+  <div class="footer-inner">
+    <p class="footer-copy">&copy; 2026 DeadlineGhost. Built with care by kud lee.</p>
+    <div class="footer-links">
+      <a href="https://x.com/DeadlineGhost" target="_blank">X / Twitter</a>
+      <a href="https://github.com/develku" target="_blank">GitHub</a>
+      <a href="mailto:officialkud@gmail.com">Contact</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+// Nav scroll
+const nav = document.getElementById('main-nav');
+window.addEventListener('scroll', () => {
+  nav.classList.toggle('scrolled', window.scrollY > 20);
+}, { passive: true });
+
+// Scroll-triggered fade-in with stagger
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.style.opacity = '1';
+      entry.target.style.transform = 'translateY(0)';
+    }
+  });
+}, { threshold: 0.1, rootMargin: '0px 0px -30px 0px' });
+
+document.querySelectorAll('.step, .feature-card, .state-card, .roadmap-card').forEach((el, i) => {
+  el.style.opacity = '0';
+  el.style.transform = 'translateY(16px)';
+  el.style.transition = `opacity 0.5s ease ${i % 4 * 0.08}s, transform 0.5s ease ${i % 4 * 0.08}s`;
+  observer.observe(el);
+});
+
+// Smooth scroll
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    const t = document.querySelector(a.getAttribute('href'));
+    if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+});
+
+// Theme toggle
+function toggleTheme() {
+  const html = document.documentElement;
+  html.classList.add('theme-transitioning');
+  const current = html.getAttribute('data-theme');
+  const next = current === 'dark' ? null : 'dark';
+  if (next) html.setAttribute('data-theme', 'dark');
+  else html.removeAttribute('data-theme');
+  try { if (next) localStorage.setItem('theme', 'dark'); else localStorage.removeItem('theme'); } catch(e) {}
+  setTimeout(() => html.classList.remove('theme-transitioning'), 350);
+}
+
+// OS preference listener — only when no manual preference
+window.matchMedia('(prefers-color-scheme:dark)').addEventListener('change', function(e) {
+  try { if (localStorage.getItem('theme')) return; } catch(ex) {}
+  if (e.matches) document.documentElement.setAttribute('data-theme', 'dark');
+  else document.documentElement.removeAttribute('data-theme');
+});
+</script>
+
+</body>
+</html>
