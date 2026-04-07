@@ -4,9 +4,9 @@
 
 ADHD-friendly visual timer with white noise for macOS. A menu bar ghost that follows your cursor and grows more agitated as your deadline approaches.
 
-[![Download on the Mac App Store](https://img.shields.io/badge/Download-Mac%20App%20Store-blue?logo=apple&logoColor=white)](https://apps.apple.com/app/deadlineghost)
-[![Platform](https://img.shields.io/badge/platform-macOS%2026+-333?logo=apple)](https://apps.apple.com/app/deadlineghost)
-[![Website](https://img.shields.io/badge/website-live-green)](https://develku.github.io/deadlineghost-website/)
+[![Download on the Mac App Store](https://img.shields.io/badge/Download-Mac%20App%20Store-blue?style=for-the-badge&logo=apple&logoColor=white)](https://apps.apple.com/app/deadlineghost)
+[![Platform](https://img.shields.io/badge/platform-macOS%2026+-333?style=for-the-badge&logo=apple)](https://apps.apple.com/app/deadlineghost)
+[![Website](https://img.shields.io/badge/website-live-green?style=for-the-badge)](https://develku.github.io/deadlineghost-website/)
 
 ## How It Works
 
