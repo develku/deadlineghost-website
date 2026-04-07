@@ -35,7 +35,7 @@ ADHD-friendly visual timer with white noise for macOS. A menu bar ghost that fol
 
 - [Website](https://develku.github.io/deadlineghost-website/)
 - [Mac App Store](https://apps.apple.com/app/deadlineghost)
-- [X / Twitter](https://x.com/DeadlineGhost)
+- [X / Twitter](https://x.com/deadlinehaunt)
 - [Contact](mailto:officialkud@gmail.com)
 
 ## License
