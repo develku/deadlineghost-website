@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Video Layout Options — Pick one</title>
+  <meta name="color-scheme" content="light dark">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --blue: #3b82f6;
+      --blue-bg: #eff6ff;
+      --blue-bg-deep: #dbeafe;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-tertiary: #94a3b8;
+      --border: #e2e8f0;
+      --radius: 16px;
+      --radius-lg: 24px;
+      --bg-secondary: #f8fafc;
+      --card-bg: #ffffff;
+      --shadow-color: rgba(0, 0, 0, 0.1);
+      --shadow-color-light: rgba(0, 0, 0, 0.05);
+      --frame-gradient-start: #e8f0fe;
+      --frame-gradient-end: #f0f4ff;
+      --tab-bg: rgba(255, 255, 255, 0.8);
+    }
+    /* Dark mode: keep in sync with index.html and hiw-layouts.html */
+    [data-theme="dark"] {
+      --blue-bg: #1e3a5f;
+      --blue-bg-deep: #1e3a5f;
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-tertiary: #64748b;
+      --border: #334155;
+      --bg-secondary: #1e293b;
+      --card-bg: #1e293b;
+      --shadow-color: rgba(0, 0, 0, 0.3);
+      --shadow-color-light: rgba(0, 0, 0, 0.2);
+      --frame-gradient-start: #1e293b;
+      --frame-gradient-end: #334155;
+      --tab-bg: rgba(30, 41, 59, 0.8);
+    }
+    .theme-transitioning body,
+    .theme-transitioning .frame,
+    .theme-transitioning .tab-bar {
+      transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease !important;
+    }
+    body {
+      font-family: 'Inter', -apple-system, system-ui, sans-serif;
+      color: var(--text-primary);
+      background: var(--bg-secondary);
+      padding: 40px 24px;
+      -webkit-font-smoothing: antialiased;
+    }
+    h1 { text-align: center; font-size: 28px; font-weight: 800; margin-bottom: 8px; }
+    .subtitle { text-align: center; color: var(--text-secondary); margin-bottom: 48px; font-size: 15px; }
+
+    .option {
+      max-width: 920px;
+      margin: 0 auto 64px;
+      position: relative;
+    }
+    .option-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--blue);
+      color: white;
+      font-size: 14px;
+      font-weight: 700;
+      padding: 6px 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+    }
+    .option-desc {
+      color: var(--text-secondary);
+      font-size: 14px;
+      margin-bottom: 16px;
+    }
+    .frame {
+      background: linear-gradient(145deg, var(--frame-gradient-start), var(--frame-gradient-end));
+      border-radius: var(--radius-lg);
+      box-shadow: 0 20px 60px var(--shadow-color), 0 0 0 1px rgba(59, 130, 246, 0.06);
+      overflow: hidden;
+    }
+    video {
+      display: block;
+      border-radius: var(--radius);
+      box-shadow: 0 8px 24px var(--shadow-color);
+    }
+    .vid-label {
+      text-align: center;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-top: 10px;
+    }
+    hr { border: none; border-top: 2px dashed var(--border); margin: 64px auto; max-width: 200px; }
+
+    /* ═══ OPTION A: Stacked vertical, full width ═══ */
+    .frame-a {
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+    .frame-a video { width: 100%; }
+
+    /* ═══ OPTION B: Side by side, equal height (cropped) ═══ */
+    .frame-b {
+      padding: 32px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    .frame-b .vid-wrap {
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: 0 8px 24px var(--shadow-color);
+      aspect-ratio: 4/3;
+    }
+    .frame-b video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 0;
+      box-shadow: none;
+    }
+
+    /* ═══ OPTION C: Hero landscape + portrait thumbnail ═══ */
+    .frame-c {
+      padding: 32px;
+      display: grid;
+      grid-template-columns: 1fr 280px;
+      gap: 24px;
+      align-items: start;
+    }
+    .frame-c video { width: 100%; }
+    .frame-c .vid-secondary { max-height: 400px; object-fit: contain; }
+
+    /* ═══ OPTION D: Portrait left + Landscape stacked right ═══ */
+    .frame-d {
+      padding: 32px;
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 24px;
+      align-items: center;
+    }
+    .frame-d video { width: 100%; }
+
+    /* ═══ OPTION E: Tabs (one at a time) ═══ */
+    .frame-e {
+      padding: 0;
+    }
+    .tab-bar {
+      display: flex;
+      background: var(--tab-bg);
+      border-bottom: 1px solid var(--border);
+      padding: 0 32px;
+    }
+    .tab-btn {
+      padding: 14px 24px;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-tertiary);
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .tab-btn.active {
+      color: var(--blue);
+      border-bottom-color: var(--blue);
+    }
+    .tab-content {
+      padding: 32px;
+    }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+    .tab-panel video { width: 100%; border-radius: var(--radius); box-shadow: 0 8px 24px var(--shadow-color); }
+
+    /* ═══ OPTION F: Overlapping cards ═══ */
+    .frame-f {
+      padding: 40px 32px 40px 32px;
+      position: relative;
+      min-height: 500px;
+    }
+    .frame-f .vid-main {
+      width: 65%;
+      border-radius: var(--radius);
+      box-shadow: 0 12px 32px var(--shadow-color);
+      position: relative;
+      z-index: 1;
+    }
+    .frame-f .vid-float {
+      position: absolute;
+      right: 32px;
+      bottom: 40px;
+      width: 42%;
+      border-radius: var(--radius);
+      box-shadow: 0 16px 40px var(--shadow-color);
+      border: 3px solid var(--border);
+      z-index: 2;
+    }
+
+    /* ══════ THEME TOGGLE ══════ */
+    .theme-toggle {
+      position: fixed; top: 16px; right: 16px; z-index: 100;
+      display: flex; align-items: center; justify-content: center;
+      width: 36px; height: 36px; border-radius: 10px;
+      background: var(--card-bg); border: 1px solid var(--border);
+      cursor: pointer; color: var(--text-secondary);
+      transition: background 0.2s, color 0.2s, border-color 0.2s;
+      box-shadow: 0 2px 8px var(--shadow-color-light);
+    }
+    .theme-toggle:hover { color: var(--blue); border-color: var(--blue); }
+    .theme-toggle .icon-moon { display: none; }
+    [data-theme="dark"] .theme-toggle .icon-sun { display: none; }
+    [data-theme="dark"] .theme-toggle .icon-moon { display: block; }
+
+    @media (max-width: 768px) {
+      .frame-b { grid-template-columns: 1fr; }
+      .frame-c { grid-template-columns: 1fr; }
+      .frame-d { grid-template-columns: 1fr; }
+      .frame-f .vid-main { width: 100%; }
+      .frame-f .vid-float { position: static; width: 100%; margin-top: 16px; border: none; }
+    }
+  </style>
+  <script>(function(){try{var t=localStorage.getItem('theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');else if(!t&&window.matchMedia('(prefers-color-scheme:dark)').matches)document.documentElement.setAttribute('data-theme','dark')}catch(e){}})()</script>
+</head>
+<body>
+
+<button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark mode">
+  <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+  <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+</button>
+
+<h1>Pick a video layout</h1>
+<p class="subtitle">Same two videos, six different arrangements. Pick your favorite.</p>
+
+<!-- ═══ A ═══ -->
+<div class="option">
+  <div class="option-label">A — Stacked full width</div>
+  <p class="option-desc">Both videos full width, stacked vertically. Simple and clean. (Current layout)</p>
+  <div class="frame frame-a">
+    <div>
+      <video autoplay muted loop playsinline><source src="img/deadline-task-HD 1080p.mov" type="video/mp4"></video>
+      <p class="vid-label">Task &amp; Deadline tracking</p>
+    </div>
+    <div>
+      <video autoplay muted loop playsinline><source src="img/deadline-sound-HD 1080p.mov" type="video/mp4"></video>
+      <p class="vid-label">White noise &amp; Focus sounds</p>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<!-- ═══ B ═══ -->
+<div class="option">
+  <div class="option-label">B — Side by side, equal height (cropped to 4:3)</div>
+  <p class="option-desc">Both videos cropped to the same aspect ratio so they sit side by side at equal height.</p>
+  <div class="frame frame-b">
+    <div>
+      <div class="vid-wrap"><video autoplay muted loop playsinline><source src="img/deadline-task-HD 1080p.mov" type="video/mp4"></video></div>
+      <p class="vid-label">Task &amp; Deadline tracking</p>
+    </div>
+    <div>
+      <div class="vid-wrap"><video autoplay muted loop playsinline><source src="img/deadline-sound-HD 1080p.mov" type="video/mp4"></video></div>
+      <p class="vid-label">White noise &amp; Focus sounds</p>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<!-- ═══ C ═══ -->
+<div class="option">
+  <div class="option-label">C — Landscape hero + portrait sidebar</div>
+  <p class="option-desc">Sound video takes the main stage (wide), task video sits as a smaller portrait beside it.</p>
+  <div class="frame frame-c">
+    <div>
+      <video autoplay muted loop playsinline><source src="img/deadline-sound-HD 1080p.mov" type="video/mp4"></video>
+      <p class="vid-label">White noise &amp; Focus sounds</p>
+    </div>
+    <div>
+      <video autoplay muted loop playsinline class="vid-secondary"><source src="img/deadline-task-HD 1080p.mov" type="video/mp4"></video>
+      <p class="vid-label">Task &amp; Deadline tracking</p>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<!-- ═══ D ═══ -->
+<div class="option">
+  <div class="option-label">D — Portrait left + landscape right</div>
+  <p class="option-desc">Task video (portrait) on the left, sound video (landscape) on the right. Natural sizes.</p>
+  <div class="frame frame-d">
+    <div>
+      <video autoplay muted loop playsinline><source src="img/deadline-task-HD 1080p.mov" type="video/mp4"></video>
+      <p class="vid-label">Task &amp; Deadline tracking</p>
+    </div>
+    <div>
+      <video autoplay muted loop playsinline><source src="img/deadline-sound-HD 1080p.mov" type="video/mp4"></video>
+      <p class="vid-label">White noise &amp; Focus sounds</p>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<!-- ═══ E ═══ -->
+<div class="option">
+  <div class="option-label">E — Tabs (one at a time)</div>
+  <p class="option-desc">Toggle between videos with tab buttons. Keeps the section compact.</p>
+  <div class="frame frame-e">
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="switchTab(0)">Task &amp; Deadline tracking</button>
+      <button class="tab-btn" onclick="switchTab(1)">White noise &amp; Focus sounds</button>
+    </div>
+    <div class="tab-content">
+      <div class="tab-panel active">
+        <video autoplay muted loop playsinline><source src="img/deadline-task-HD 1080p.mov" type="video/mp4"></video>
+      </div>
+      <div class="tab-panel">
+        <video autoplay muted loop playsinline><source src="img/deadline-sound-HD 1080p.mov" type="video/mp4"></video>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<!-- ═══ F ═══ -->
+<div class="option">
+  <div class="option-label">F — Overlapping cards</div>
+  <p class="option-desc">Sound video as the main background, task video floats on top as a smaller card. Adds depth.</p>
+  <div class="frame frame-f">
+    <video autoplay muted loop playsinline class="vid-main"><source src="img/deadline-sound-HD 1080p.mov" type="video/mp4"></video>
+    <video autoplay muted loop playsinline class="vid-float"><source src="img/deadline-task-HD 1080p.mov" type="video/mp4"></video>
+  </div>
+</div>
+
+<script>
+function switchTab(idx) {
+  document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', i === idx));
+  document.querySelectorAll('.tab-panel').forEach((p, i) => p.classList.toggle('active', i === idx));
+}
+
+function toggleTheme() {
+  const html = document.documentElement;
+  html.classList.add('theme-transitioning');
+  const current = html.getAttribute('data-theme');
+  const next = current === 'dark' ? null : 'dark';
+  if (next) html.setAttribute('data-theme', 'dark');
+  else html.removeAttribute('data-theme');
+  try { if (next) localStorage.setItem('theme', 'dark'); else localStorage.removeItem('theme'); } catch(e) {}
+  setTimeout(() => html.classList.remove('theme-transitioning'), 350);
+}
+window.matchMedia('(prefers-color-scheme:dark)').addEventListener('change', function(e) {
+  try { if (localStorage.getItem('theme')) return; } catch(ex) {}
+  if (e.matches) document.documentElement.setAttribute('data-theme', 'dark');
+  else document.documentElement.removeAttribute('data-theme');
+});
+</script>
+
+</body>
+</html>
