@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Set up the Background Sounds Shortcut — DeadlineGhost</title>
+  <meta name="description" content="Install the DeadlineGhost Background Sounds Apple Shortcut in one tap from iCloud, or rebuild it manually with these step-by-step blocks.">
+  <script>(function(){try{var t=localStorage.getItem('theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');else if(!t&&window.matchMedia('(prefers-color-scheme:dark)').matches)document.documentElement.setAttribute('data-theme','dark')}catch(e){}})()</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue: #3b82f6;
+      --blue-dark: #2563eb;
+      --blue-bg: #eff6ff;
+      --blue-bg-deep: #dbeafe;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-tertiary: #94a3b8;
+      --bg-primary: #ffffff;
+      --bg-secondary: #f8fafc;
+      --bg-tertiary: #f1f5f9;
+      --card-bg: #ffffff;
+      --border: #e2e8f0;
+      --nav-bg: rgba(255, 255, 255, 0.82);
+      --shadow-color: rgba(0, 0, 0, 0.08);
+      --max-width: 820px;
+    }
+
+    [data-theme="dark"] {
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-tertiary: #64748b;
+      --bg-primary: #0f172a;
+      --bg-secondary: #1e293b;
+      --bg-tertiary: #334155;
+      --card-bg: #1e293b;
+      --border: #334155;
+      --blue-bg: rgba(59, 130, 246, 0.15);
+      --blue-bg-deep: rgba(59, 130, 246, 0.3);
+      --nav-bg: rgba(15, 23, 42, 0.85);
+      --shadow-color: rgba(0, 0, 0, 0.3);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: var(--text-primary);
+      background: var(--bg-primary);
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+    }
+
+    /* BACK LINK */
+    .top-bar {
+      max-width: 1080px; margin: 0 auto;
+      padding: 24px 24px 0;
+    }
+    .back-link {
+      display: inline-flex; align-items: center; gap: 6px;
+      color: var(--text-secondary); text-decoration: none;
+      font-size: 14px; font-weight: 500;
+      transition: color 0.2s;
+    }
+    .back-link:hover { color: var(--blue); }
+
+    /* CONTENT */
+    .container {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: clamp(32px, 5vw, 72px) 24px clamp(48px, 6vw, 96px);
+    }
+
+    h1 {
+      font-size: clamp(32px, 4.5vw, 48px);
+      font-weight: 800;
+      margin-bottom: 10px;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+    }
+
+    .lede {
+      color: var(--text-tertiary);
+      font-size: clamp(15px, 1.2vw, 18px);
+      margin-bottom: clamp(32px, 4vw, 56px);
+      max-width: 640px;
+    }
+
+    h2 {
+      font-size: clamp(20px, 2vw, 28px);
+      font-weight: 700;
+      margin-top: clamp(40px, 4vw, 64px);
+      margin-bottom: 14px;
+      letter-spacing: -0.01em;
+      line-height: 1.3;
+    }
+
+    p {
+      color: var(--text-secondary);
+      margin-bottom: 18px;
+      font-size: clamp(15px, 1.15vw, 17px);
+      line-height: 1.75;
+    }
+
+    ul, ol {
+      color: var(--text-secondary);
+      font-size: clamp(15px, 1.15vw, 17px);
+      margin-bottom: 18px;
+      padding-left: 24px;
+      line-height: 1.75;
+    }
+    ul li, ol li { margin-bottom: 10px; }
+    ol ul { margin-top: 8px; margin-bottom: 8px; }
+
+    a { color: var(--blue); }
+
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.9em;
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+    }
+
+    /* SHORTCUT GRAPH IMAGE */
+    .shortcut-img {
+      display: block;
+      max-width: 100%;
+      width: 360px;
+      height: auto;
+      margin: 24px auto 32px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      box-shadow: 0 8px 28px var(--shadow-color);
+      background: var(--bg-secondary);
+    }
+
+    /* INPUT TABLE */
+    table.inputs {
+      width: 100%;
+      max-width: 640px;
+      border-collapse: collapse;
+      margin: 8px 0 24px;
+      font-size: clamp(14px, 1.1vw, 16px);
+    }
+    table.inputs th, table.inputs td {
+      text-align: left;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    table.inputs th {
+      font-weight: 600;
+      color: var(--text-primary);
+      background: var(--bg-secondary);
+    }
+    table.inputs td:first-child { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+
+    /* BUTTONS */
+    .actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin: 24px 0 8px;
+    }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 12px 22px;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: background 0.2s, transform 0.15s, color 0.2s;
+    }
+    .btn-primary {
+      background: var(--blue); color: white !important;
+    }
+    .btn-primary:hover { background: var(--blue-dark); transform: translateY(-1px); }
+    .btn-secondary {
+      background: var(--card-bg); color: var(--text-primary) !important;
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover { background: var(--bg-tertiary); transform: translateY(-1px); }
+
+    /* INFO CALLOUT */
+    .callout {
+      background: var(--blue-bg);
+      border: 1px solid var(--blue-bg-deep);
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin: 16px 0 24px;
+      font-size: clamp(14px, 1.1vw, 16px);
+      color: var(--text-primary);
+    }
+    .callout strong { font-weight: 600; }
+
+    /* FOOTER */
+    footer { padding: 36px 24px; border-top: 1px solid var(--border); }
+    .footer-inner {
+      max-width: 1080px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .footer-copy { font-size: 13px; color: var(--text-tertiary); }
+    .footer-links { display: flex; gap: 20px; }
+    .footer-links a {
+      color: var(--text-tertiary); text-decoration: none; font-size: 13px;
+      transition: color 0.2s;
+    }
+    .footer-links a:hover { color: var(--text-primary); }
+
+    @media (max-width: 768px) {
+      .footer-inner { flex-direction: column; gap: 12px; }
+      .actions { flex-direction: column; align-items: stretch; }
+      .btn { justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="top-bar">
+  <a href="index.html#whitenoise" class="back-link">&larr; Back to White Noise</a>
+</div>
+
+<div class="container">
+  <h1>Set up the Background Sounds Shortcut</h1>
+  <p class="lede">DeadlineGhost controls macOS Background Sounds through a small Apple Shortcut named <code>DeadlineGhost Background Sounds</code>. Routing through Shortcuts is what makes the app App Sandbox–safe and App Store distributable — sandboxed apps can't write to other apps' system preferences directly. You only set this up once.</p>
+
+  <h2>A. One-tap install (recommended)</h2>
+  <p>Click the button below. macOS opens Shortcuts.app and asks you to add the shortcut to your library. Keep the name as <code>DeadlineGhost Background Sounds</code> — DeadlineGhost looks it up by name.</p>
+  <div class="actions">
+    <a href="https://www.icloud.com/shortcuts/c176d5d37a464a648045743023c9a6d1"
+       class="btn btn-primary" target="_blank" rel="noopener">
+      Install Shortcut from iCloud
+    </a>
+    <a href="#build-yourself" class="btn btn-secondary">Build it yourself instead</a>
+  </div>
+  <div class="callout">
+    <strong>Already installed?</strong> Open DeadlineGhost, then in Settings &rarr; Sound, the Shortcut row shows <em>Installed</em>. If the in-app prompt keeps appearing, click <em>Already installed</em> there to mark it.
+  </div>
+
+  <h2 id="build-yourself">B. Build it yourself</h2>
+  <p>Open Shortcuts.app, create a new shortcut, name it exactly <code>DeadlineGhost Background Sounds</code>, and assemble these blocks in order. The screenshot below shows the finished layout.</p>
+  <img class="shortcut-img" src="img/background-sounds-shortcut.png" alt="Block layout for the DeadlineGhost Background Sounds shortcut: receive Apps and Text input, branch on whether the input contains 'vol:' to extract a number and turn sounds on at that volume, otherwise toggle on/off based on the literal input.">
+  <ol>
+    <li><strong>Receive</strong> Apps and Text from Nowhere. <em>If there's no input:</em> Continue.</li>
+    <li><strong>If</strong> Shortcut Input <em>contains</em> <code>vol:</code>
+      <ul>
+        <li><strong>Replace</strong> <code>vol:</code> with empty in Shortcut Input &rarr; <code>Updated Text</code></li>
+        <li><strong>Get Numbers from</strong> Updated Text &rarr; <code>Numbers</code></li>
+        <li><strong>Turn background sounds On</strong></li>
+        <li><strong>Change background sounds volume to</strong> Numbers</li>
+      </ul>
+    </li>
+    <li><strong>Otherwise</strong>
+      <ul>
+        <li><strong>If</strong> Shortcut Input <em>is</em> <code>on</code>
+          <ul>
+            <li><strong>Turn background sounds On</strong></li>
+          </ul>
+        </li>
+        <li><strong>Otherwise</strong>
+          <ul>
+            <li><strong>Turn background sounds Off</strong></li>
+          </ul>
+        </li>
+        <li><strong>End If</strong></li>
+      </ul>
+    </li>
+    <li><strong>End If</strong></li>
+    <li><strong>Stop and output</strong> If Result. <em>If there's nowhere to output:</em> Do Nothing.</li>
+  </ol>
+
+  <h2>C. Inputs the app sends</h2>
+  <p>Every focus-session transition fires the shortcut once with one of these text inputs:</p>
+  <table class="inputs">
+    <thead>
+      <tr><th>Input</th><th>Effect</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>on</td><td>Turn background sounds ON (volume unchanged)</td></tr>
+      <tr><td>off</td><td>Turn background sounds OFF</td></tr>
+      <tr><td>vol:50</td><td>Turn ON at 50% volume (any number 0&ndash;100)</td></tr>
+    </tbody>
+  </table>
+
+  <h2>D. Troubleshooting</h2>
+  <ul>
+    <li><strong>Shortcut name mismatch.</strong> The app invokes by name. If you renamed it, restore <code>DeadlineGhost Background Sounds</code> exactly &mdash; capitalisation included.</li>
+    <li><strong>Picking which sound plays.</strong> macOS Shortcuts' <em>Change Background Sound</em> action only accepts a fixed picker value, not a magic variable. Choose the sound (rain, stream, ocean, etc.) once in System Settings &rarr; Accessibility &rarr; Audio &rarr; Background Sounds. The app's <em>Settings &rarr; Sound &rarr; Choose Sound&hellip;</em> button opens that pane.</li>
+    <li><strong>Shortcut prompt keeps reappearing.</strong> Open DeadlineGhost &rarr; Settings &rarr; Sound. The Shortcut row has a <em>Reset</em> button to clear the install flag. Click <em>Already installed</em> next time the prompt fires.</li>
+    <li><strong>Volume changes get dropped.</strong> The app collapses on/off and volume into a single <code>vol:N</code> invocation to avoid back-to-back shortcut races. If you customised the shortcut, keep the single-pass branching above.</li>
+  </ul>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <p class="footer-copy">&copy; 2026 DeadlineGhost. Built with care by kud lee.</p>
+    <div class="footer-links">
+      <a href="https://x.com/DeadlineGhost" target="_blank">X / Twitter</a>
+      <a href="https://github.com/develku" target="_blank">GitHub</a>
+      <a href="mailto:deadlineghost@icloud.com">Contact</a>
+      <a href="/privacy.html">Privacy</a>
+      <a href="/terms.html">Terms</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+window.matchMedia('(prefers-color-scheme:dark)').addEventListener('change', function(e) {
+  try { if (localStorage.getItem('theme')) return; } catch(ex) {}
+  if (e.matches) document.documentElement.setAttribute('data-theme', 'dark');
+  else document.documentElement.removeAttribute('data-theme');
+});
+</script>
+
+</body>
+</html>
